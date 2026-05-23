@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
     """
     Return the appropriate page of the dataset.
