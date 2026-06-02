@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Simple pagination module."""
-
 import csv
 from typing import List, Tuple
 
 
 def index_range(page: int, page_size: int) -> Tuple[int, int]:
-    """Return start and end indexes for pagination."""
-    start_index = (page - 1) * page_size
-    end_index = start_index + page_size
-
-    return (start_index, end_index)
+    """Return a tuple containing start and end indexes."""
+    start = (page - 1) * page_size
+    end = start + page_size
+    return (start, end)
 
 
 class Server:
@@ -19,16 +17,16 @@ class Server:
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self) -> None:
-        """Initialize the Server instance."""
+        """Initialize the server."""
         self.__dataset = None
 
     def dataset(self) -> List[List]:
         """Return the cached dataset."""
         if self.__dataset is None:
-            with open(self.DATA_FILE) as file:
-                reader = csv.reader(file)
+            with open(self.DATA_FILE) as f:
+                reader = csv.reader(f)
                 dataset = [row for row in reader]
-                self.__dataset = dataset[1:]
+            self.__dataset = dataset[1:]
 
         return self.__dataset
 
@@ -41,11 +39,7 @@ class Server:
         assert isinstance(page, int) and page > 0
         assert isinstance(page_size, int) and page_size > 0
 
-        start_index, end_index = index_range(page, page_size)
-
+        start, end = index_range(page, page_size)
         dataset = self.dataset()
 
-        if start_index >= len(dataset):
-            return []
-
-        return dataset[start_index:end_index]
+        return dataset[start:end]
