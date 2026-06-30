@@ -1,2 +1,4 @@
-// adds a new attribute address to all documents with name="ALX"
-db.school.updateMany({ name: "ALX" }, { $set: { address: "972 Mission street" } })
+db.school.updateMany(
+    { name: "ALX" },
+    { $set: { address: "972 Mission street" } }
+);
