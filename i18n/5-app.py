@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Module that mocks a user login system using a URL parameter."""
+from typing import Dict, Union
+
+from flask import Flask, g, render_template, request
+from flask_babel import Babel
+
+
+class Config:
+    """Application configuration class for Flask and Babel settings."""
+
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+
+
+app = Flask(__name__)
+app.config.from_object(Config)
+babel = Babel(app)
+
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
+
+
+def get_user() -> Union[Dict, None]:
+    """Return the user dictionary matching the 'login_as' URL parameter.
+
+    Returns None if the parameter is not present or the ID is not found
+    in the mock users table.
+    """
+    user_id = request.args.get("login_as")
+    if user_id is None:
+        return None
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return None
+    return users.get(user_id)
+
+
+@app.before_request
+def before_request() -> None:
+    """Find a user, if any, and set it as a global on flask.g.user."""
+    g.user = get_user()
+
+
+@babel.localeselector
+def get_locale() -> str:
+    """Determine the best matching locale for the current request.
+
+    If a supported locale is provided through the 'locale' URL parameter,
+    it takes priority over the request's Accept-Language header.
+    """
+    locale = request.args.get("locale")
+    if locale and locale in app.config["LANGUAGES"]:
+        return locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
+
+
+@app.route("/", strict_slashes=False)
+def index() -> str:
+    """Render the index page of the application."""
+    return render_template("5-index.html")
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
